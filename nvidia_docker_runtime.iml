@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="RUBY_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/spec/fixtures/work-dir/cache" />
+    </content>
+    <orderEntry type="jdk" jdkName="ruby-2.6.2-p47" jdkType="RUBY_SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="ast (v2.4.0, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="bundler (v1.17.3, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="facter (v2.5.1, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="fast_gettext (v1.1.2, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="hiera (v3.5.0, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="locale (v2.1.2, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rake (v12.3.2, ruby-2.6.2-p47) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ruby-progressbar (v1.10.0, ruby-2.6.2-p47) [gem]" level="application" />
+  </component>
+</module>
