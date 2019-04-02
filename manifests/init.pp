@@ -17,12 +17,15 @@ class nvidia_docker_runtime (
   String $nvidia_docker2_version = latest,
 ) {
 
-  # REVISIT: Want to require docker but causes circular dependencies
   include apt
 
   $distribution = "${$facts['operatingsystem'].downcase}${$facts['operatingsystemmajrelease']}"
-  $cuda_repo = "https://developer.download.nvidia.com/compute/cuda/repos/${regsubst($distribution, '\.', '', 'G')}
-    /x86_64"
+  $distribution_no_dot = regsubst($distribution, '\.', '', 'G')
+  $cuda_arch = $facts['architecture'] ? {
+    'amd64' => 'x86_64',
+    default => $facts['architecture'],
+  }
+  $cuda_repo = "https://developer.download.nvidia.com/compute/cuda/repos/${$distribution_no_dot}/${cuda_arch}"
 
   $linux_headers_package = "linux-headers-${$facts['kernelrelease']}"
   package { ['build-essential', $linux_headers_package]:
