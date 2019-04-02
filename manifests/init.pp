@@ -5,30 +5,55 @@
 # @example
 #   include nvidia_docker_runtime
 
+# TODO: facts:
+# $ docker inspect -f '{{index .Config.Labels "com.nvidia.volumes.needed"}}' nvidia/cuda
+# nvidia_driver
+# $ docker inspect -f '{{index .Config.Labels "com.nvidia.cuda.version"}}' nvidia/cuda
+# 7.5
+
+# TODO: facts of installed versions of meta packages
+
+# TODO: set default runtime?
+# /etc/docker/daemon.json:
+# "default-runtime": "nvidia",
+
+# TODO: specify package versions using ensure
+
 class nvidia_docker_runtime (
   String $nvidia_driver_version  = '418', # Driver versions: https://www.nvidia.com/object/unix.html
   String $cuda_version           = '10.1',
   String $nvidia_docker2_version = latest,
+  # Boolean $nvidia_utils          = false,
 ) {
 
   # TODO: Want to require docker but causes circular dependencies
   include apt
 
-  # Fill this in from this page (or it's siblings): https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1804&target_type=deblocal
+  $distribution = "${$facts['operatingsystem'].downcase}${$facts['operatingsystemmajrelease']}"
+  $repo_url_prefix = "https://developer.download.nvidia.com/compute/cuda/repos/${regsubst($distribution, '\.', '', 'G')}/x86_64/"
+
+  # Fill this in from this page (or it's siblings): https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1804&target_type=debnetwork
+  # Links to the checksums can be found there too
   # Driver / CUDA version compatibility: https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver
-  $cuda_version_map_deb_url = {
-    '10.1' =>
-    'https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda-repo-ubuntu1804-10-0-local-10.0.130-410.48_1.0-1_amd64'
-    ,
-    '10.0' =>
-    'https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1804-10-1-local-10.1.105-418.39_1.0-1_amd64.deb'
-    ,
-  }
-  $cuda_key_pub = '7fa2af80'
+  $cuda_deb = {
+    '10.0' => {
+      url  => "${repo_url_prefix}cuda-repo-ubuntu1804_10.0.130-1_amd64.deb",
+      checksum => '306fbaad179372f5f200c8d2c2c9b8bb',
+    },
+    '10.1' => {
+      url  => "${repo_url_prefix}cuda-repo-ubuntu1804_10.1.105-1_amd64.deb",
+      checksum => '68e4203b3a99a292109758d481f6d331',
+    },
+  }[$cuda_version]
 
   $linux_headers_package = "linux-headers-${$facts['kernelrelease']}"
-  $cuda_deb_local_path = '/root/cuda.deb'
-  $cuda_key_id = $cuda_key_pub.upcase
+  $nvidia_driver_pkg = "nvidia-headless-${$nvidia_driver_version}"
+  $nvidia_key_id = 'C95B321B61E88C1809C4F759DDCAE044F796ECB0'
+
+  $cache_dir = '/var/cache/nvidia_docker_runtime'
+  $cuda_deb_path = "${$cache_dir}/cuda-${cuda_version}-network.deb"
+  $cuda_drivers_pkg = "cuda-runtime-${regsubst($cuda_version, '\.', '-', 'G')}"
+  $cuda_key_id = 'AE09FE4BBD223A84B2CCFCE3F60F4B3D7FA2AF80'
 
   package { ['software-properties-common', 'build-essential', $linux_headers_package]:
     ensure => latest
@@ -38,36 +63,53 @@ class nvidia_docker_runtime (
     require => Package['software-properties-common'],
   }
 
-  package { ["nvidia-headless-${$nvidia_driver_version}", "nvidia-utils-${$nvidia_driver_version}"]:
+  package { $nvidia_driver_pkg:
     ensure  => latest,
-    require => [Apt::Ppa['ppa:graphics-drivers/ppa']],
+    require => Apt::Ppa['ppa:graphics-drivers/ppa'],
   }
 
-  file { $cuda_deb_local_path:
-    ensure => file,
-    source => $cuda_version_map_deb_url[$cuda_version],
+  # package { "nvidia-utils-${$nvidia_driver_version}":
+  #   ensure => ($nvidia_utils ? latest: absent),
+  #   require => Apt::Ppa['ppa:graphics-drivers/ppa'],
+  # }
+
+  file { $cache_dir:
+    ensure => directory,
+  }
+
+  # TODO: Throw error if CUDA version map lookup finds nothing
+
+  file { $cuda_deb_path:
+    ensure         => present,
+    source         => $cuda_deb['url'],
+    checksum_value => $cuda_deb['checksum'],
+    checksum       => 'md5',
+    require        => File[$cache_dir],
   }
 
   package { 'cuda-deb-install':
-    source   => $cuda_deb_local_path,
+    source   => $cuda_deb_path,
     provider => dpkg,
-    require  => File[$cuda_deb_local_path],
+    require  => File[$cuda_deb_path],
   }
 
   apt::key { $cuda_key_id:
-    source  => "/var/cuda-repo-${$cuda_version}/${$cuda_key_pub}.pub",
-    require => Package['cuda-deb-install'],
+    source => "${repo_url_prefix}${$cuda_key_id[-8,8].downcase}.pub",
   }
 
-  package { 'cuda-drivers':
-    require => Apt::Key[$cuda_key_id],
+  package { $cuda_drivers_pkg:
+    require => [
+      Package['build-essential'],
+      Package[$linux_headers_package],
+      Package['cuda-deb-install'],
+      Apt::Key[$cuda_key_id],
+    ],
   }
 
-  apt::key { 'C95B321B61E88C1809C4F759DDCAE044F796ECB0':
+  apt::key { $nvidia_key_id:
     source => 'https://nvidia.github.io/nvidia-docker/gpgkey',
   }
 
-  $distribution = "${$facts['operatingsystem'].downcase}${$facts['operatingsystemmajrelease']}"
   $nvidia_docker_sources_comment = "See: https://nvidia.github.io/nvidia-docker/${$distribution}/nvidia-docker.list"
 
   apt::source { 'libnvidia-container':
@@ -75,7 +117,7 @@ class nvidia_docker_runtime (
     location => "https://nvidia.github.io/libnvidia-container/${$distribution}/$(ARCH)",
     release  => '/',
     repos    => '',
-    require  => [Apt::Key['C95B321B61E88C1809C4F759DDCAE044F796ECB0']],
+    require  => Apt::Key[$nvidia_key_id],
   }
 
   apt::source { 'nvidia-container-runtime':
@@ -83,7 +125,7 @@ class nvidia_docker_runtime (
     location => "https://nvidia.github.io/nvidia-container-runtime/${$distribution}/$(ARCH)",
     release  => '/',
     repos    => '',
-    require  => [Apt::Key['C95B321B61E88C1809C4F759DDCAE044F796ECB0']],
+    require  => Apt::Key[$nvidia_key_id],
   }
 
   apt::source { 'nvidia-docker':
@@ -91,7 +133,7 @@ class nvidia_docker_runtime (
     location => "https://nvidia.github.io/nvidia-docker/${$distribution}/$(ARCH)",
     release  => '/',
     repos    => '',
-    require  => [Apt::Key['C95B321B61E88C1809C4F759DDCAE044F796ECB0']],
+    require  => Apt::Key[$nvidia_key_id],
   }
 
   package { 'nvidia-docker2':
@@ -100,8 +142,8 @@ class nvidia_docker_runtime (
       Apt::Source['libnvidia-container'],
       Apt::Source['nvidia-container-runtime'],
       Apt::Source['nvidia-docker'],
-      Package["nvidia-headless-${$nvidia_driver_version}"],
-      Package['cuda-drivers'],
+      Package[$nvidia_driver_pkg],
+      Package[$cuda_drivers_pkg],
     ],
   }
 
