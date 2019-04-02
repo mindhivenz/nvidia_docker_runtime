@@ -1,6 +1,12 @@
-# A description of what this class does
+# Installs NVIDIA runtime for Docker and the required NVIDIA/CUDA drivers
 #
-# @summary A short summary of the purpose of this class
+# @summary Allows the use of `docker run --runtime=nvidia ...`
+#
+# @param driver_version
+#   NVIDIA/CUDA driver version, for exmaple: `418.*`. Use to lock down to a specific version. Default: `latest`
+#
+# @param nvidia_docker2_version
+#   NVIDIA runtime version. Use to lock down to a specific version. Default: `latest`
 #
 # @example
 #   include nvidia_docker_runtime
