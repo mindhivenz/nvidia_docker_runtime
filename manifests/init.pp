@@ -3,10 +3,10 @@
 # @summary Allows the use of `docker run --runtime=nvidia ...`
 #
 # @param driver_version
-#   NVIDIA/CUDA driver version, for exmaple: `418.*`. Use to lock down to a specific version. Default: `latest`
+#   NVIDIA/CUDA driver version, for exmaple: `418.40.04-1`. Use to lock down to a specific version. Default: `latest`
 #
 # @param nvidia_docker2_version
-#   NVIDIA runtime version. Use to lock down to a specific version. Default: `latest`
+#   NVIDIA Docker runtime version, for example: `2.0.3+docker18.09.4-1`. Use to lock down to a specific version. Default: `latest`
 #
 # @example
 #   include nvidia_docker_runtime
@@ -27,75 +27,40 @@ class nvidia_docker_runtime (
   }
   $cuda_repo = "https://developer.download.nvidia.com/compute/cuda/repos/${$distribution_no_dot}/${cuda_arch}"
 
-  $linux_headers_package = "linux-headers-${$facts['kernelrelease']}"
-  package { ['build-essential', $linux_headers_package]:
-    ensure => latest
-  }
-
-  $cuda_key_id = 'AE09FE4BBD223A84B2CCFCE3F60F4B3D7FA2AF80'
-  apt::key { $cuda_key_id:
+  apt::key { 'AE09FE4BBD223A84B2CCFCE3F60F4B3D7FA2AF80':
     source => "${cuda_repo}/7fa2af80.pub",
   }
-
-  apt::source { 'cuda':
+  -> apt::source { 'cuda':
     comment  => 'Normally installed by the CUDA network deb installer',
     location => $cuda_repo,
     release  => '/',
     repos    => '',
-    require  => Apt::Key[$cuda_key_id],
+  }
+  ~> Exec['apt_update']
+  -> package { ['build-essential', "linux-headers-${$facts['kernelrelease']}"]:
+    ensure => present
+  }
+  -> package { 'cuda-drivers':
+    ensure => $driver_version,
   }
 
-  package { 'cuda-drivers':
-    ensure  => $driver_version,
-    require => [
-      Package['build-essential'],
-      Package[$linux_headers_package],
-      Apt::Source['cuda'],
-    ],
-  }
-
-  $nvidia_docker_key_id = 'C95B321B61E88C1809C4F759DDCAE044F796ECB0'
-  apt::key { $nvidia_docker_key_id:
+  apt::key { 'C95B321B61E88C1809C4F759DDCAE044F796ECB0':
     source => 'https://nvidia.github.io/nvidia-docker/gpgkey',
   }
-
-  $nvidia_docker_sources_comment = "See: https://nvidia.github.io/nvidia-docker/${$distribution}/nvidia-docker.list"
-
-  apt::source { 'libnvidia-container':
-    comment  => $nvidia_docker_sources_comment,
-    location => "https://nvidia.github.io/libnvidia-container/${$distribution}/$(ARCH)",
-    release  => '/',
-    repos    => '',
-    require  => Apt::Key[$nvidia_docker_key_id],
+  -> ['libnvidia-container', 'nvidia-container-runtime', 'nvidia-docker'].map |$source| {
+    apt::source { $source:
+      comment  => "See: https://nvidia.github.io/nvidia-docker/${$distribution}/nvidia-docker.list",
+      location => "https://nvidia.github.io/${$source}/${$distribution}/$(ARCH)",
+      release  => '/',
+      repos    => '',
+    }
   }
-
-  apt::source { 'nvidia-container-runtime':
-    comment  => $nvidia_docker_sources_comment,
-    location => "https://nvidia.github.io/nvidia-container-runtime/${$distribution}/$(ARCH)",
-    release  => '/',
-    repos    => '',
-    require  => Apt::Key[$nvidia_docker_key_id],
-  }
-
-  apt::source { 'nvidia-docker':
-    comment  => $nvidia_docker_sources_comment,
-    location => "https://nvidia.github.io/nvidia-docker/${$distribution}/$(ARCH)",
-    release  => '/',
-    repos    => '',
-    require  => Apt::Key[$nvidia_docker_key_id],
-  }
-
-  package { 'nvidia-docker2':
+  ~> Exec['apt_update']
+  -> package { 'nvidia-docker2':
     ensure  => $nvidia_docker2_version,
-    require => [
-      Apt::Source['libnvidia-container'],
-      Apt::Source['nvidia-container-runtime'],
-      Apt::Source['nvidia-docker'],
-      Package['cuda-drivers'],
-    ],
+    require => Package['cuda-drivers'],
   }
-
-  exec { 'restart docker':
+  ~> exec { 'restart docker':
     command     => 'pkill -SIGHUP dockerd',
     path        => '/usr/sbin:/usr/bin:/sbin:/bin',
     refreshonly => true,
