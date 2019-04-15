@@ -8,11 +8,11 @@
 # @param nvidia_docker2_version
 #   NVIDIA Docker runtime version, for example: `2.0.3+docker18.09.4-1`. Use to lock down to a specific version. Default: `latest`
 #
+# Driver versions for CUDA versions: https://docs.nvidia.com/deploy/cuda-compatibility/index.html
+#
 # @example
 #   include nvidia_docker_runtime
-
 class nvidia_docker_runtime (
-  # Driver versions for CUDA versions: https://docs.nvidia.com/deploy/cuda-compatibility/index.html
   String $driver_version         = latest,
   String $nvidia_docker2_version = latest,
 ) {
