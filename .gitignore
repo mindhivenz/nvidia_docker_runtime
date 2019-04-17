@@ -1,7 +1,9 @@
+.git/
 .*.sw[op]
 .metadata
 .yardoc
 .yardwarns
+*.iml
 /.bundle/
 /.idea/workspace.xml
 /.vagrant/
@@ -20,3 +22,6 @@
 /convert_report.txt
 /update_report.txt
 .DS_Store
+.project
+.envrc
+/inventory.yaml
