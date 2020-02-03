@@ -1,6 +1,6 @@
 {
   "name": "mindhive-nvidia_docker_runtime",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "author": "damon@mindhive.co.nz",
   "summary": "Manage NVIDIA Docker runtime",
   "license": "MIT",
