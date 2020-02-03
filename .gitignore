@@ -5,7 +5,7 @@
 .yardwarns
 *.iml
 /.bundle/
-/.idea/workspace.xml
+/.idea/
 /.vagrant/
 /coverage/
 /bin/
