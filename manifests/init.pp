@@ -6,7 +6,7 @@
 #   NVIDIA/CUDA driver version, for exmaple: `418.40.04-1`. Use to lock down to a specific version. Default: `latest`
 #
 # @param nvidia_container_toolkit_version
-#   NVIDIA container toolkit version, for example: `3.0.1`. Use to lock down to a specific version. Default: `latest`
+#   NVIDIA container toolkit version, for example: `1.0.5-1`. Use to lock down to a specific version. Default: `latest`
 #
 # Driver versions for CUDA versions: https://docs.nvidia.com/deploy/cuda-compatibility/index.html
 #
@@ -18,6 +18,7 @@ class nvidia_docker_runtime (
 ) {
 
   include apt
+  include docker
 
   $distribution = "${$facts['operatingsystem'].downcase}${$facts['operatingsystemmajrelease']}"
   $distribution_no_dot = regsubst($distribution, '\.', '', 'G')
@@ -60,10 +61,6 @@ class nvidia_docker_runtime (
     ensure  => $nvidia_container_toolkit_version,
     require => Package['cuda-drivers'],
   }
-  ~> exec { 'restart docker':
-    command     => 'pkill -SIGHUP dockerd',
-    path        => '/usr/sbin:/usr/bin:/sbin:/bin',
-    refreshonly => true,
-  }
+  ~> Service['docker']
 
 }
