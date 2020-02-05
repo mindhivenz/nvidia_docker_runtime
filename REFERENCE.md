@@ -33,13 +33,13 @@ Data type: `String`
 
 NVIDIA/CUDA driver version, for exmaple: `418.40.04-1`. Use to lock down to a specific version. Default: `latest`
 
-Default value: latest
+Default value: installed
 
 ##### `nvidia_container_toolkit_version`
 
 Data type: `String`
 
-NVIDIA container toolkit version, for example: `3.0.1`. Use to lock down to a specific version. Default: `latest`
+NVIDIA container toolkit version, for example: `1.0.5-1`. Use to lock down to a specific version. Default: `latest`
 
-Default value: latest
+Default value: installed
 
