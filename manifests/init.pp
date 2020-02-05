@@ -13,8 +13,8 @@
 # @example
 #   include nvidia_docker_runtime
 class nvidia_docker_runtime (
-  String $driver_version                   = latest,
-  String $nvidia_container_toolkit_version = latest,
+  String $driver_version                   = installed,
+  String $nvidia_container_toolkit_version = installed,
 ) {
 
   include apt
