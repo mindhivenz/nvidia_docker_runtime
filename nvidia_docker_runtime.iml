@@ -6,8 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/manifests" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/facter" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/spec/fixtures/manifests" />
-      <excludeFolder url="file://$MODULE_DIR$/spec/fixtures/modules" />
       <excludeFolder url="file://$MODULE_DIR$/spec/fixtures/work-dir/cache" />
     </content>
     <orderEntry type="jdk" jdkName="rbenv: 2.6.5" jdkType="RUBY_SDK" />

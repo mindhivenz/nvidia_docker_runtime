@@ -31,15 +31,15 @@ The following parameters are available in the `nvidia_docker_runtime` class.
 
 Data type: `String`
 
-NVIDIA/CUDA driver version, for exmaple: `418.40.04-1`. Use to lock down to a specific version. Default: `latest`
+NVIDIA/CUDA driver version, for exmaple: `440.64.00-1`. Use to lock down to a specific version. Default: `installed`
 
 Default value: installed
 
-##### `nvidia_container_toolkit_version`
+##### `nvidia_docker2_version`
 
 Data type: `String`
 
-NVIDIA container toolkit version, for example: `1.0.5-1`. Use to lock down to a specific version. Default: `latest`
+nvidia_docker2 version, for example: `2.2.2-1`. Use to lock down to a specific version. Default: `installed`
 
 Default value: installed
 

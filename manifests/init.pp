@@ -3,18 +3,18 @@
 # @summary Allows the use of `docker run --runtime=nvidia ...`
 #
 # @param driver_version
-#   NVIDIA/CUDA driver version, for exmaple: `418.40.04-1`. Use to lock down to a specific version. Default: `latest`
+#   NVIDIA/CUDA driver version, for exmaple: `440.64.00-1`. Use to lock down to a specific version. Default: `installed`
 #
-# @param nvidia_container_toolkit_version
-#   NVIDIA container toolkit version, for example: `1.0.5-1`. Use to lock down to a specific version. Default: `latest`
+# @param nvidia_docker2_version
+#   nvidia_docker2 version, for example: `2.2.2-1`. Use to lock down to a specific version. Default: `installed`
 #
 # Driver versions for CUDA versions: https://docs.nvidia.com/deploy/cuda-compatibility/index.html
 #
 # @example
 #   include nvidia_docker_runtime
 class nvidia_docker_runtime (
-  String $driver_version                   = installed,
-  String $nvidia_container_toolkit_version = installed,
+  String $driver_version         = installed,
+  String $nvidia_docker2_version = installed,
 ) {
 
   include apt
@@ -39,7 +39,7 @@ class nvidia_docker_runtime (
   }
   ~> Exec['apt_update']
   -> package { ['build-essential', "linux-headers-${$facts['kernelrelease']}"]:
-    ensure => present
+    ensure => installed
   }
   -> package { 'cuda-drivers':
     ensure => $driver_version,
@@ -57,10 +57,46 @@ class nvidia_docker_runtime (
     }
   }
   ~> Exec['apt_update']
-  -> package { 'nvidia-container-toolkit':
-    ensure  => $nvidia_container_toolkit_version,
-    require => Package['cuda-drivers'],
+  -> package { 'nvidia-docker2':
+    ensure  => $nvidia_docker2_version,
+    require => [
+      Package['cuda-drivers'],
+      Class[docker::install],
+    ],
   }
   ~> Service['docker']
+
+  $gpu_ids = $facts['gpus'].map |$gpu| { $gpu['gpu_uuid'][0,11] }
+  Package['nvidia-docker2']
+  -> augeas { 'daemon.json':
+    lens    => 'Json.lns',
+    incl    => '/etc/docker/daemon.json',
+    changes => [
+      'set dict/entry[. = "default-runtime"] default-runtime',
+      'set dict/entry[. = "default-runtime"]/string nvidia',
+      'set dict/entry[. = "node-generic-resources"] node-generic-resources',
+      'touch dict/entry[. = "node-generic-resources"]/array',
+    ] + $gpu_ids.map |Integer $i, String $gpu_id| {
+      "set dict/entry[. = 'node-generic-resources']/array/string[${$i + 1}] 'gpu=${gpu_id}'"
+    },
+  }
+  ~> Service['docker']
+
+  $config_toml = '/etc/nvidia-container-runtime/config.toml'
+  Package['nvidia-docker2']
+  -> exec { 'uncomment-swarm-resource':
+    command => "/bin/sed -i '/swarm-resource = \"DOCKER_RESOURCE_GPU\"/s/^#//g' ${config_toml}",
+    onlyif  => "/bin/grep '#swarm-resource' ${config_toml}",
+  }
+  ~> Service['docker']
+  # Toml.lns seems broken
+  # -> augeas { 'config.toml':
+  #   lens => 'Toml.lns',
+  #   incl => '/etc/nvidia-container-runtime/config.toml',
+  #   changes => [
+  #     'set entry[. = "swarm-resource"] swarm-resource',
+  #     'set entry[. = "swarm-resource"]/string DOCKER_RESOURCE_GPU',
+  #   ],
+  # }
 
 }

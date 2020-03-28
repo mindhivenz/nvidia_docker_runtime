@@ -1,0 +1,5 @@
+---
+Gemfile:
+  required:
+    ':development':
+      - gem: 'github_changelog_generator'

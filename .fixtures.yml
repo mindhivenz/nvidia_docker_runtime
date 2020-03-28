@@ -5,3 +5,5 @@ fixtures:
   forge_modules:
     stdlib: puppetlabs/stdlib
     apt: puppetlabs/apt
+    docker: puppetlabs/docker
+    augeas: puppetlabs/augeas_core

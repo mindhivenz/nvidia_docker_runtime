@@ -1,0 +1,22 @@
+---
+gpus:
+  - model: GeForce RTX 2080 Ti
+    irq: "98"
+    gpu_uuid: GPU-029409bb-3d4a-53e2-7257-591ec063bdca
+    video_bios: 90.02.17.00.b2
+    bus_type: PCIe
+    dma_size: 47 bits
+    dma_mask: 0x7fffffffffff
+    bus_location: "0000:17:00.0"
+    device_minor: "0"
+    blacklisted: "No"
+  - model: GeForce RTX 2080 Ti
+    irq: "99"
+    gpu_uuid: GPU-453382e3-c6f0-b9e8-b42a-246c6fe61dc9
+    video_bios: 90.02.17.00.b2
+    bus_type: PCIe
+    dma_size: 47 bits
+    dma_mask: 0x7fffffffffff
+    bus_location: "0000:65:00.0"
+    device_minor: "1"
+    blacklisted: "No"
