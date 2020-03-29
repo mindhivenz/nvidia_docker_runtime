@@ -66,7 +66,11 @@ class nvidia_docker_runtime (
   }
   ~> Service['docker']
 
-  $gpu_ids = $facts['gpus'].map |$gpu| { $gpu['gpu_uuid'][0,11] }
+  $gpu_ids = if 'gpus' in $facts {
+    $facts['gpus'].map |$gpu| { $gpu['gpu_uuid'][0,11] }
+  } else {
+    []
+  }
   Package['nvidia-docker2']
   -> augeas { 'daemon.json':
     lens    => 'Json.lns',
