@@ -44,6 +44,7 @@ class nvidia_docker_runtime (
   -> package { 'cuda-drivers':
     ensure => $driver_version,
   }
+  # No need to trigger here has should touch /var/run/reboot-required which unattended-upgrades will pick up on
 
   apt::key { 'C95B321B61E88C1809C4F759DDCAE044F796ECB0':
     source => 'https://nvidia.github.io/nvidia-docker/gpgkey',
