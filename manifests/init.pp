@@ -87,21 +87,12 @@ class nvidia_docker_runtime (
   }
   ~> Service['docker']
 
-  $config_toml = '/etc/nvidia-container-runtime/config.toml'
   Package['nvidia-docker2']
-  -> exec { 'uncomment-swarm-resource':
-    command => "/bin/sed -i '/swarm-resource = \"DOCKER_RESOURCE_GPU\"/s/^#//g' ${config_toml}",
-    onlyif  => "/bin/grep '#swarm-resource' ${config_toml}",
+  -> file_line { 'uncomment-swarm-resource':
+    path  => '/etc/nvidia-container-runtime/config.toml',
+    line  => 'swarm-resource = "DOCKER_RESOURCE_GPU"',
+    match => '^#?swarm-resource',
   }
   ~> Service['docker']
-  # Toml.lns seems broken
-  # -> augeas { 'config.toml':
-  #   lens => 'Toml.lns',
-  #   incl => '/etc/nvidia-container-runtime/config.toml',
-  #   changes => [
-  #     'set entry[. = "swarm-resource"] swarm-resource',
-  #     'set entry[. = "swarm-resource"]/string DOCKER_RESOURCE_GPU',
-  #   ],
-  # }
 
 }
