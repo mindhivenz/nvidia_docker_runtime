@@ -1,11 +1,11 @@
 
 Facter.add('gpus') do
   setcode do
-    Dir['/proc/driver/nvidia/gpus/*/information'].map { |info_file|
+    Dir['/proc/driver/nvidia/gpus/*/information'].map do |info_file|
       File.readlines(info_file).map { |line|
-        key, value = line.strip.split(/:\s*/, 2)
-        [key.downcase.gsub(' ', '_'), value]
+        key, value = line.strip.split(%r{:\s*}, 2)
+        [key.downcase.tr(' ', '_'), value]
       }.to_h
-    }
+    end
   end
 end
