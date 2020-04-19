@@ -3,9 +3,8 @@
 .metadata
 .yardoc
 .yardwarns
-*.iml
 /.bundle/
-/.idea/
+/.idea/workspace.xml
 /.vagrant/
 /coverage/
 /bin/
