@@ -95,4 +95,10 @@ class nvidia_docker_runtime (
   }
   ~> Service['docker']
 
+  Class['nvidia_docker_runtime'] -> Docker::Exec <| |>
+  Class['nvidia_docker_runtime'] -> Docker::Run <| |>
+  Class['nvidia_docker_runtime'] -> Docker::Services <| |>
+  Class['nvidia_docker_runtime'] -> Docker::Stack <| |>
+  Class['nvidia_docker_runtime'] -> Docker_stack <| |>
+
 }
