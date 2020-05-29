@@ -1,6 +1,6 @@
 {
   "name": "mindhive-nvidia_docker_runtime",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": "damon@mindhive.co.nz",
   "summary": "Manage NVIDIA Docker runtime",
   "license": "MIT",
@@ -14,7 +14,7 @@
     },
     {
       "name": "puppetlabs/apt",
-      "version_requirement": ">= 6.3.0 < 7.0.0"
+      "version_requirement": ">= 6.3.0 < 8.0.0"
     },
     {
       "name": "puppetlabs/docker",
@@ -35,7 +35,7 @@
       "version_requirement": ">= 5.0.0 < 7.0.0"
     }
   ],
-  "pdk-version": "1.17.0",
-  "template-url": "pdk-default#1.17.0",
-  "template-ref": "tags/1.17.0-0-gd3a4319"
+  "pdk-version": "1.18.0",
+  "template-url": "pdk-default#1.18.0",
+  "template-ref": "tags/1.18.0-0-g095317c"
 }
