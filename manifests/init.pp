@@ -28,6 +28,9 @@ class nvidia_docker_runtime (
   }
   $cuda_repo = "https://developer.download.nvidia.com/compute/cuda/repos/${$distribution_no_dot}/${cuda_arch}"
 
+  $cuda_driver_dependencies = ['build-essential', "linux-headers-${$facts[kernelrelease]}"]
+  ensure_packages($cuda_driver_dependencies)
+
   apt::key { 'AE09FE4BBD223A84B2CCFCE3F60F4B3D7FA2AF80':
     source => "${cuda_repo}/7fa2af80.pub",
   }
@@ -38,11 +41,9 @@ class nvidia_docker_runtime (
     repos    => '',
   }
   ~> Exec['apt_update']
-  -> package { ['build-essential', "linux-headers-${$facts['kernelrelease']}"]:
-    ensure => installed
-  }
   -> package { 'cuda-drivers':
-    ensure => $driver_version,
+    ensure  => $driver_version,
+    require => Package[$cuda_driver_dependencies],
   }
   # No need to trigger here has should touch /var/run/reboot-required which unattended-upgrades will pick up on
 
