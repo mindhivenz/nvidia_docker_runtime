@@ -4,7 +4,6 @@
 .yardoc
 .yardwarns
 /.bundle/
-/.idea/workspace.xml
 /.vagrant/
 /coverage/
 /bin/

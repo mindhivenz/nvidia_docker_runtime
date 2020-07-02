@@ -3,9 +3,7 @@
 .metadata
 .yardoc
 .yardwarns
-*.iml
 /.bundle/
-/.idea/
 /.vagrant/
 /coverage/
 /bin/
@@ -40,3 +38,5 @@
 /.yardopts
 /spec/
 /.vscode/
+/.idea/
+*.iml
