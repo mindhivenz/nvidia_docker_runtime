@@ -20,11 +20,11 @@ class nvidia_docker_runtime (
   include apt
   include docker
 
-  $distribution = "${$facts['operatingsystem'].downcase}${$facts['operatingsystemmajrelease']}"
+  $distribution = "${$facts[os][name].downcase}${$facts[os][release][major]}"
   $distribution_no_dot = regsubst($distribution, '\.', '', 'G')
-  $cuda_arch = $facts['architecture'] ? {
+  $cuda_arch = $facts[architecture] ? {
     'amd64' => 'x86_64',
-    default => $facts['architecture'],
+    default => $facts[architecture],
   }
   $cuda_repo = "https://developer.download.nvidia.com/compute/cuda/repos/${$distribution_no_dot}/${cuda_arch}"
 
@@ -32,6 +32,7 @@ class nvidia_docker_runtime (
   ensure_packages($cuda_driver_dependencies)
 
   apt::key { 'AE09FE4BBD223A84B2CCFCE3F60F4B3D7FA2AF80':
+    ensure => refreshed,
     source => "${cuda_repo}/7fa2af80.pub",
   }
   -> apt::source { 'cuda':
@@ -48,6 +49,7 @@ class nvidia_docker_runtime (
   # No need to trigger here has should touch /var/run/reboot-required which unattended-upgrades will pick up on
 
   apt::key { 'C95B321B61E88C1809C4F759DDCAE044F796ECB0':
+    ensure => refreshed,
     source => 'https://nvidia.github.io/nvidia-docker/gpgkey',
   }
   -> ['libnvidia-container', 'nvidia-container-runtime', 'nvidia-docker'].map |$source| {
