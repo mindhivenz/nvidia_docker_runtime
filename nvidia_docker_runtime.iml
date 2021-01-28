@@ -17,4 +17,9 @@
     <orderEntry type="library" scope="PROVIDED" name="net-telnet (v0.1.1, PDK) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rake (v12.3.3, PDK) [gem]" level="application" />
   </component>
+  <component name="RakeTasksCache">
+    <option name="myRootTask">
+      <RakeTaskImpl id="rake" />
+    </option>
+  </component>
 </module>
