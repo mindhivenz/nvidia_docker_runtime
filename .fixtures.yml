@@ -7,3 +7,4 @@ fixtures:
     apt: puppetlabs/apt
     docker: puppetlabs/docker
     augeas: puppetlabs/augeas_core
+    reboot: puppetlabs/reboot

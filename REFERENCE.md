@@ -10,7 +10,7 @@
 
 ## Classes
 
-### `nvidia_docker_runtime`
+### <a name="nvidia_docker_runtime"></a>`nvidia_docker_runtime`
 
 Installs NVIDIA runtime for Docker and the required NVIDIA/CUDA drivers
 
@@ -26,9 +26,12 @@ include nvidia_docker_runtime
 
 #### Parameters
 
-The following parameters are available in the `nvidia_docker_runtime` class.
+The following parameters are available in the `nvidia_docker_runtime` class:
 
-##### `driver_version`
+* [`driver_version`](#driver_version)
+* [`nvidia_docker2_version`](#nvidia_docker2_version)
+
+##### <a name="driver_version"></a>`driver_version`
 
 Data type: `String`
 
@@ -36,7 +39,7 @@ NVIDIA/CUDA driver version, for exmaple: `440.64.00-1`. Use to lock down to a sp
 
 Default value: `installed`
 
-##### `nvidia_docker2_version`
+##### <a name="nvidia_docker2_version"></a>`nvidia_docker2_version`
 
 Data type: `String`
 

@@ -46,7 +46,7 @@ class nvidia_docker_runtime (
     ensure  => $driver_version,
     require => Package[$cuda_driver_dependencies],
   }
-  # No need to trigger here has should touch /var/run/reboot-required which unattended-upgrades will pick up on
+  ~> reboot { 'drivers-installed': }
 
   apt::key { 'C95B321B61E88C1809C4F759DDCAE044F796ECB0':
     ensure => refreshed,
@@ -75,6 +75,7 @@ class nvidia_docker_runtime (
   } else {
     []
   }
+
   Package['nvidia-docker2']
   -> augeas { 'daemon.json':
     lens    => 'Json.lns',
