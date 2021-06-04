@@ -46,7 +46,19 @@ class nvidia_docker_runtime (
     ensure  => $driver_version,
     require => Package[$cuda_driver_dependencies],
   }
-  ~> reboot { 'drivers-installed': }
+  ~> reboot { 'drivers-installed':
+    apply => immediately,
+  }
+
+  Package['cuda-drivers']
+  -> exec { 'Trigger if driver version mismatch':
+    command  => '/bin/true',
+    onlyif   => '/usr/bin/nvidia-smi 2>&1 | grep "version mismatch"',
+    provider => shell,
+  }
+  ~> reboot { 'version-mismatch':
+    apply => finished,
+  }
 
   apt::key { 'C95B321B61E88C1809C4F759DDCAE044F796ECB0':
     ensure => refreshed,
