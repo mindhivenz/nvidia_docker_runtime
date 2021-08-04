@@ -29,7 +29,7 @@ class nvidia_docker_runtime (
   $cuda_repo = "https://developer.download.nvidia.com/compute/cuda/repos/${$distribution_no_dot}/${cuda_arch}"
 
   $cuda_driver_dependencies = ['build-essential', "linux-headers-${$facts[kernelrelease]}"]
-  ensure_packages($cuda_driver_dependencies)
+  ensure_packages($cuda_driver_dependencies, {'ensure' => 'present'})
 
   apt::key { 'AE09FE4BBD223A84B2CCFCE3F60F4B3D7FA2AF80':
     ensure => refreshed,
