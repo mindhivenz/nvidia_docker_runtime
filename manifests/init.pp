@@ -82,34 +82,17 @@ class nvidia_docker_runtime (
   }
   ~> Service['docker']
 
-  $gpu_ids = if 'gpus' in $facts {
-    $facts['gpus'].map |$gpu| { $gpu['gpu_uuid'][0,11] }
-  } else {
-    []
-  }
-
-  Package['nvidia-docker2']
-  -> augeas { 'daemon.json':
-    lens    => 'Json.lns',
-    incl    => '/etc/docker/daemon.json',
-    changes => [
-      'set dict/entry[. = "default-runtime"] default-runtime',
-      'set dict/entry[. = "default-runtime"]/string nvidia',
-      'set dict/entry[. = "node-generic-resources"] node-generic-resources',
-      'touch dict/entry[. = "node-generic-resources"]/array',
-    ] + $gpu_ids.map |Integer $i, String $gpu_id| {
-      "set dict/entry[. = 'node-generic-resources']/array/string[${$i + 1}] 'gpu=${gpu_id}'"
-    },
-  }
-  ~> Service['docker']
-
-  Package['nvidia-docker2']
-  -> file_line { 'uncomment-swarm-resource':
-    path  => '/etc/nvidia-container-runtime/config.toml',
-    line  => 'swarm-resource = "DOCKER_RESOURCE_GPU"',
-    match => '^#?swarm-resource',
-  }
-  ~> Service['docker']
+  # REVISIT: Is this needed or does nvidia-docker2 do it for us?
+  # Package['nvidia-docker2']
+  # -> augeas { 'daemon.json':
+  #   lens    => 'Json.lns',
+  #   incl    => '/etc/docker/daemon.json',
+  #   changes => [
+  #     'set dict/entry[. = "default-runtime"] default-runtime',
+  #     'set dict/entry[. = "default-runtime"]/string nvidia',
+  #   ],
+  # }
+  # ~> Service['docker']
 
   Class['nvidia_docker_runtime'] -> Docker::Exec <| |>
   Class['nvidia_docker_runtime'] -> Docker::Run <| |>

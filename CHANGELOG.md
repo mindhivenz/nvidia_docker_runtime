@@ -1,11 +1,7 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## Release 3.0.0
 
-## Release 0.1.0
+**Backwards incompatible changes**
 
-**Features**
-
-**Bugfixes**
-
-**Known Issues**
+- Remove setting of swarm resources
